@@ -4,7 +4,7 @@ import random
 
 
 
-def csv_to_data(filename):
+def csv_to_stardata(filename):
     df=pd.read_csv(filename)
     x=df['x'].values
     y=df['y'].values
@@ -50,3 +50,47 @@ def match_points(points,norm,theta,center):
 
 def do_possibility(probability):
     return random.random() < probability
+
+#各座標点から距離が最小の星のHIPnumを返す
+def polar_calc_near_dot(reshaped_position,dotsize,HIPnum):
+    near_dot=[[-1 for _ in range(dotsize)] for _ in range(dotsize)]
+    near_dist=[[float('inf') for _ in range(dotsize)] for _ in range(dotsize)]
+    for i in range(dotsize):
+        for j in range(dotsize):
+            x_dot,y_dot=j,i
+            dot=np.array([x_dot,y_dot])
+            for k in range(len(reshaped_position)):
+                dist=calc_dist(dot,reshaped_position[k])
+                if dist<near_dist[i][j]:
+                    near_dist[i][j]=dist
+                    near_dot[i][j]=HIPnum[k]
+    return near_dot
+
+#各座標点から距離が最小の星のHIPnumを返す
+def equator_calc_near_dot(reshaped_position,dotsize_x,dotsize_y,HIPnum):
+    near_dot=[[-1 for _ in range(dotsize_x)] for _ in range(dotsize_y)]
+    near_dist=[[float('inf') for _ in range(dotsize_x)] for _ in range(dotsize_y)]
+    for i in range(dotsize_y):
+        for j in range(dotsize_x):
+            x_dot,y_dot=j,i
+            dot=np.array([x_dot,y_dot])
+            for k in range(len(reshaped_position)):
+                dist=calc_dist(dot,reshaped_position[k])
+                if dist<near_dist[i][j]:
+                    near_dist[i][j]=dist
+                    near_dot[i][j]=HIPnum[k]
+    return near_dot
+
+#min以上max未満の距離の2点(インデックス表示)をタプルのリストで返す
+def calc_edge_list(x,y,HIPnum,min,max):
+    edge_list=[]
+    position=np.column_stack((x,y))
+    for i in range(len(x)):
+        if i==len(x)-1:
+            break
+        for j in range(i+1,len(x)):
+            dist=calc_dist(position[i],position[j])
+            if dist<max and dist>=min:
+                edge_list.append((i,j))
+    return edge_list
+
