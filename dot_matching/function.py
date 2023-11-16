@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 
 
@@ -67,7 +68,7 @@ def polar_calc_near_dot(reshaped_position,dotsize,HIPnum):
     return near_dot
 
 #各座標点から距離が最小の星のHIPnumを返す
-def equator_calc_near_dot(reshaped_position,dotsize_x,dotsize_y,HIPnum):
+def equator_calc_near_dot(reshaped_position,dotsize_x,dotsize_y):
     near_dot=[[-1 for _ in range(dotsize_x)] for _ in range(dotsize_y)]
     near_dist=[[float('inf') for _ in range(dotsize_x)] for _ in range(dotsize_y)]
     for i in range(dotsize_y):
@@ -82,7 +83,7 @@ def equator_calc_near_dot(reshaped_position,dotsize_x,dotsize_y,HIPnum):
     return near_dot
 
 #min以上max未満の距離の2点(インデックス表示)をタプルのリストで返す
-def calc_edge_list(x,y,HIPnum,min,max):
+def calc_edge_list(x,y,min,max):
     edge_list=[]
     position=np.column_stack((x,y))
     for i in range(len(x)):
@@ -93,4 +94,75 @@ def calc_edge_list(x,y,HIPnum,min,max):
             if dist<max and dist>=min:
                 edge_list.append((i,j))
     return edge_list
+
+
+def plot_stars(directions,point_edge_list):
+    if len(directions)==1:
+        direction=directions[0]
+        if direction.direction=='north' or direction.direction=='south':
+            a_points=direction.min_a_points
+            a_x=direction.reshaped_position[:,0]
+            a_y=direction.reshaped_position[:,1]
+            lum=direction.star_data[:,2]
+            size=200*np.exp(-1*(lum+2)*np.log(2))
+            fig,axes=plt.subplots(nrows=2,ncols=1,figsize=(direction.dotsize_x/10,direction.dotsize_y*2/10))
+            for ax in axes:
+                ax.set_facecolor('black')
+                ax.scatter(a_x,a_y,s=size,color='white')
+            axes[0].scatter(direction.min_a_points[:,0],direction.min_a_points[:,1],color='red',s=5)
+            for edge in point_edge_list:
+                p1=direction.min_a_points[edge[0]]
+                p2=direction.min_a_points[edge[1]]
+                axes[0].plot((p1[0],p2[0]),(p1[1],p2[1]),color='yellow',alpha=0.5,lw=5)
+            for edge in point_edge_list:
+                p1=direction.reshaped_position[direction.min_stars[edge[0]]]
+                p2=direction.reshaped_position[direction.min_stars[edge[1]]]
+                axes[1].plot((p1[0],p2[0]),(p1[1],p2[1]),color='yellow',alpha=0.5,lw=5)
+            plt.show()
+            return
+        else:
+            print('error')
+            return
+    elif len(directions)==2:
+        if directions[0].direction!='equator':
+            print('error')
+            return
+        if directions[0].direction=='equator' and directions[1].direction=='ex_equator':
+            fig,axes=plt.subplots(nrows=2, ncols=1,figsize=(directions[0].dotsize_x*5/4/10,directions[0].dotsize_y/10*2))
+            a_x=directions[0].reshaped_position[:,0]
+            a_y=directions[0].reshaped_position[:,1]
+            ex_a_x=directions[1].reshaped_position[:,0]+3/4*directions[0].dotsize_x
+            ex_a_y=directions[1].reshaped_position[:,1]
+            lum=directions[0].star_data[:,2]
+            size=200*np.exp(-1*(lum+2)*np.log(2))
+            ex_lum=directions[1].star_data[:,2]
+            ex_size=200*np.exp(-1*(ex_lum+2)*np.log(2))
+            if directions[0].min_dist>directions[1].min_dist:
+                less_direction=directions[1]
+            else:
+                less_direction=directions[0]
+
+            min_a_points=less_direction.min_a_points
+            min_stars=less_direction.min_a_points
+
+
+            for ax in axes:
+                ax.set_facecolor('black')
+                ax.scatter(ex_a_x,ex_a_y,s=ex_size,color='lightgreen')
+                ax.scatter(a_x,a_y,s=size,color='white')
+
+            axes[0].scatter(less_direction.min_a_points[:,0],less_direction.min_a_points[:,1],color='red',s=5)
+            for edge in point_edge_list:
+                p1=less_direction.min_a_points[edge[0]]
+                p2=less_direction.min_a_points[edge[1]]
+                axes[0].plot((p1[0],p2[0]),(p1[1],p2[1]),color='yellow',alpha=0.5,lw=5)
+            for edge in point_edge_list:
+                p1=less_direction.reshaped_position[less_direction.min_stars[edge[0]]]
+                p2=less_direction.reshaped_position[less_direction.min_stars[edge[1]]]
+                axes[1].plot((p1[0],p2[0]),(p1[1],p2[1]),color='yellow',alpha=0.5,lw=5)
+            plt.show()
+            return
+        else:
+            print('error')
+            return
 
