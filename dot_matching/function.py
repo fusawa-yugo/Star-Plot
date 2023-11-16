@@ -63,7 +63,7 @@ def polar_calc_near_dot(reshaped_position,dotsize,HIPnum):
                 dist=calc_dist(dot,reshaped_position[k])
                 if dist<near_dist[i][j]:
                     near_dist[i][j]=dist
-                    near_dot[i][j]=HIPnum[k]
+                    near_dot[i][j]=k
     return near_dot
 
 #各座標点から距離が最小の星のHIPnumを返す
@@ -78,7 +78,7 @@ def equator_calc_near_dot(reshaped_position,dotsize_x,dotsize_y,HIPnum):
                 dist=calc_dist(dot,reshaped_position[k])
                 if dist<near_dist[i][j]:
                     near_dist[i][j]=dist
-                    near_dot[i][j]=HIPnum[k]
+                    near_dot[i][j]=k
     return near_dot
 
 #min以上max未満の距離の2点(インデックス表示)をタプルのリストで返す
