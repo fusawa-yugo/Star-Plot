@@ -1,0 +1,17 @@
+Joint_Graph: [[0, 1], [0, 2], [0, 5], [0, 6], [1, 9], [1, 10], [2, 3], [2, 4], [5, 7], [6, 8], [9, 11], [10, 12]]
+
+Body_Joint:
+	Person1:
+		-chest: Index=0, X=385, Y=117
+		-waist: Index=1, X=415, Y=211
+		-Nose: Index=2, X=367, Y=79
+		-L_eye: Index=3, X=375, Y=72
+		-R_eye: Index=4, X=361, Y=73
+		-L_elbow: Index=5, X=445, Y=156
+		-R_elbow: Index=6, X=347, Y=159
+		-L_wrist: Index=7, X=441, Y=164
+		-R_wrist: Index=8, X=305, Y=174
+		-L_knee: Index=9, X=429, Y=284
+		-R_knee: Index=10, X=371, Y=276
+		-L_ankle: Index=11, X=475, Y=359
+		-R_ankle: Index=12, X=403, Y=345

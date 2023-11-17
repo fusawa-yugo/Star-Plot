@@ -89,7 +89,9 @@ def calc_edge_list(x,y,min,max):
     for i in range(len(x)):
         if i==len(x)-1:
             break
-        for j in range(i+1,len(x)):
+        for j in range(len(x)):
+            if i==j:
+                continue
             dist=calc_dist(position[i],position[j])
             if dist<max and dist>=min:
                 edge_list.append((i,j))
