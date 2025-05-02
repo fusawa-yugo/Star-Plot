@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import io
 from PIL import Image
 
 class Local:
@@ -249,6 +250,8 @@ def plot_stars(directions,point_edge_list,reshaped_image_array):
                 p1=direction.min_a_points[edge[0]]
                 p2=direction.min_a_points[edge[1]]
                 ax.plot((p1[0],p2[0]),(p1[1],p2[1]),color='yellow',alpha=0.5,lw=1)
+            fig.tight_layout()
+            # ax.axis('off')
             images.append(fig)
             fig,ax=plt.subplots(figsize=(direction.dotsize_x/100,direction.dotsize_y/100))
             ax.set_facecolor('black')
@@ -259,8 +262,9 @@ def plot_stars(directions,point_edge_list,reshaped_image_array):
                 ax.plot((p1[0],p2[0]),(p1[1],p2[1]),color='yellow',alpha=0.5,lw=1)
             ax.imshow(reshaped_image_array,alpha=0.7)
             ax.invert_yaxis()
+            fig.tight_layout()
+            # ax.axis('off')
             images.append(fig)
-            return images
         else:
             raise ValueError("error")
     elif len(directions)==2:
@@ -295,6 +299,8 @@ def plot_stars(directions,point_edge_list,reshaped_image_array):
                 p1=less_direction.min_a_points[edge[0]]
                 p2=less_direction.min_a_points[edge[1]]
                 ax.plot((p1[0]+translation,p2[0]+translation),(p1[1],p2[1]),color='yellow',alpha=0.5,lw=1)
+            # ax.axis('off')
+            fig.tight_layout()
             images.append(fig)
             fig,ax=plt.subplots(figsize=(directions[0].dotsize_x*5/4/100,directions[0].dotsize_y/100))
             ax.set_facecolor('black')
@@ -306,10 +312,9 @@ def plot_stars(directions,point_edge_list,reshaped_image_array):
                 ax.plot((p1[0]+translation,p2[0]+translation),(p1[1],p2[1]),color='yellow',alpha=0.5,lw=1)
             ax.imshow(reshaped_image_array,alpha=0.7)
             ax.invert_yaxis()
+            # ax.axis('off')
+            fig.tight_layout()
             images.append(fig)
-            return images
-        else:
-            return images
     return images
         
 
@@ -399,3 +404,70 @@ def reshape_and_match_image(direction,image_path,resize_rate,rotate_theta,point)
 
     return reshaped_image_array
 
+def reshape_and_match_image_binary(direction, image_binary, resize_rate, rotate_theta, point):
+    image=Image.open(io.BytesIO(image_binary))
+    width, height = image.size
+    center_x = point[0]
+    center_y = point[1]
+    resized_image = image.resize((int(width * resize_rate), int(height * resize_rate)))
+    image_array = np.array(resized_image)
+    reshaped_image_array = np.zeros((direction.dotsize_y, direction.dotsize_x, 3), dtype=int)
+    y_size = image_array.shape[0]
+    x_size = image_array.shape[1]
+
+    if direction.direction == 'ex_equator':
+        x_move = 300
+    else:
+        x_move = 0
+    if direction.direction == 'ex_equator':
+        x_add_size = 300
+    elif direction.direction == 'equator':
+        x_add_size = 100
+    else:
+        x_add_size = 0
+
+    reshaped_image_array = np.zeros((direction.dotsize_y, direction.dotsize_x + x_add_size, 3), dtype=int)
+    y_size = image_array.shape[0]
+    x_size = image_array.shape[1]
+
+    x_center = int(round(point[0] * resize_rate, 0))
+    y_center = int(round(point[1] * resize_rate, 0))
+    x_destination = int(round(direction.min_a_points[0][0], 0))
+    y_destination = int(round(direction.min_a_points[0][1], 0))
+    x_diff = int(x_destination - x_center)
+    y_diff = int(y_destination - y_center)
+
+    for i in range(y_size):
+        for j in range(x_size):
+            re_i = i - y_center
+            re_j = j - x_center
+            p = np.array([re_j, re_i])
+            rotated_p = rotate_point(p, rotate_theta)
+            ro_i = int(round(rotated_p[1], 0))
+            ro_j = int(round(rotated_p[0], 0))
+            if ro_i + y_destination < 0 or ro_j + x_destination < 0:
+                continue
+            try:
+                reshaped_image_array[ro_i + y_destination][ro_j + x_destination + x_move] = image_array[i][j]
+            except IndexError:
+                pass
+
+    for i in range(y_size):
+        for j in range(x_size):
+            re_i = i - y_center
+            re_j = j - x_center
+            p = np.array([re_j, re_i])
+            rotated_p = rotate_point(p, rotate_theta)
+            ro_i = int(round(rotated_p[1], 0))
+            ro_j = int(round(rotated_p[0], 0))
+            if ro_i + y_destination < 0 or ro_j + x_destination < 0:
+                continue
+            if ro_j + x_destination + 1 + x_move >= direction.dotsize_x + x_add_size:
+                continue
+            try:
+                if np.all(reshaped_image_array[ro_i + y_destination][ro_j + x_destination + 1 + x_move] == np.array([0, 0, 0])):
+                    reshaped_image_array[ro_i + y_destination][ro_j + x_destination + 1 + x_move] = reshaped_image_array[ro_i + y_destination][ro_j + x_destination + x_move]
+            except IndexError:
+                continue
+
+    return reshaped_image_array

@@ -1,2 +1,5 @@
-/backend/static/images/input/
-/backend/static/images/output/
+*.DS_Store
+
+
+/py_server/static/images/input/
+/py_server/static/images/output/

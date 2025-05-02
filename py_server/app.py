@@ -8,8 +8,13 @@ app = Flask(__name__)
 UPLOAD_FOLDER = './input/images'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@app.route('/upload-images', methods=['POST'])
-def upload_image():
+
+@app.route("/skeletal-points", methods=["POST"])
+def skeletal_points():
+    """
+    受け取った画像のファイル名を取得し、指定されたフォルダに保存します。
+    :return: JSON形式でファイル名を返します。
+    """
     if 'file' not in request.files:
         return jsonify({'message': 'No file part in the request'}), HTTPStatus.BAD_REQUEST
     file = request.files['file']
