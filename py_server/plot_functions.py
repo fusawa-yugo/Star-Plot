@@ -63,15 +63,18 @@ def match_skeleton_from_points(point_edge_list, raw_points, image_binary):
         buf.close()
     return results
 
-
-
+def fig_to_plot(img_binary):
+    keypoints = skeletalize_points(img_binary)
+    results=match_skeleton_from_points(keypoints['skelton'], keypoints['keypoints'], img_binary)
+    return results
 
 if __name__ == "__main__":
     with open('./plot/input/images/0.jpg', 'rb') as f:
         img_binary = f.read()
     keypoints = skeletalize_points(img_binary)
-    result = match_skeleton_from_points(keypoints['skelton'], keypoints['keypoints'], img_binary)
-    with open('./static/images/output/0.jpg', 'wb') as f:
-        f.write(result[0])
-    with open('./static/images/output/1.jpg', 'wb') as f:
-        f.write(result[1])
+    print(keypoints)
+    # result = match_skeleton_from_points(keypoints['skelton'], keypoints['keypoints'], img_binary)
+    # with open('./static/images/output/0.jpg', 'wb') as f:
+    #     f.write(result[0])
+    # with open('./static/images/output/1.jpg', 'wb') as f:
+    #     f.write(result[1])
